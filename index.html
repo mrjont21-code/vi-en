@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RTranslator Web Mini - English ↔ Vietnamese</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --bg: #202024;
+    --card: #2a2a2f;
+    --text: #e8e5df;
+    --muted: #9a978f;
+    --accent: #c47046;
+    --accent-soft: rgba(196,112,70,.18);
+    --accent2: #7ba8b8;
+    --accent2-soft: rgba(123,168,184,.18);
+    --border: rgba(232,229,223,.12);
+    --success: #4ade80;
+    --danger: #f87171;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Sora', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+  .panel {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    transition: all 0.3s ease;
+  }
+  .panel.disabled {
+    opacity: 0.35;
+    filter: grayscale(0.6);
+  }
+  .panel.active-listening {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-soft), 0 0 30px var(--accent-soft);
+  }
+  .text-box {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    min-height: 120px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 14px 16px;
+    font-size: 15px;
+    line-height: 1.6;
+    transition: border-color 0.2s;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .text-box:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .text-box[contenteditable="true"]:empty:before {
+    content: attr(placeholder);
+    color: var(--muted);
+    pointer-events: none;
+  }
+  .text-box::-webkit-scrollbar { width: 6px; }
+  .text-box::-webkit-scrollbar-track { background: transparent; }
+  .text-box::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+  .source-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .lang-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .lang-en {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+  .lang-vi {
+    background: var(--accent2-soft);
+    color: var(--accent2);
+    border: 1px solid var(--accent2);
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+    border: none;
+    font-family: inherit;
+  }
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 14px 32px;
+    min-width: 140px;
+  }
+  .btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(196,112,70,0.35);
+  }
+  .btn-primary.recording {
+    background: var(--danger);
+    animation: pulse-ring 1.5s ease-out infinite;
+  }
+  @keyframes pulse-ring {
+    0% { box-shadow: 0 0 0 0 rgba(248,113,113,0.5); }
+    70% { box-shadow: 0 0 0 16px rgba(248,113,113,0); }
+    100% { box-shadow: 0 0 0 0 rgba(248,113,113,0); }
+  }
+  .btn-toggle {
+    background: var(--card);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: 12px 20px;
+  }
+  .btn-toggle:hover:not(:disabled) {
+    border-color: var(--accent);
+  }
+  .btn-toggle.active {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn-toggle.off {
+    opacity: 0.5;
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    display: inline-block;
+  }
+  .status-dot.on {
+    background: var(--success);
+    box-shadow: 0 0 8px var(--success);
+  }
+  .status-dot.recording {
+    background: var(--danger);
+    animation: blink 1s infinite;
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  .divider {
+    width: 1px;
+    background: var(--border);
+    margin: 0 8px;
+  }
+  .translate-arrow {
+    color: var(--muted);
+    font-size: 20px;
+    text-align: center;
+    margin: 6px 0;
+  }
+  .header-title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .header-sub {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .log-entry {
+    padding: 6px 10px;
+    border-radius: 6px;
+    margin-bottom: 4px;
+    font-size: 13px;
+    background: rgba(0,0,0,0.15);
+    border-left: 3px solid var(--accent);
+  }
+  .log-entry.error {
+    border-left-color: var(--danger);
+    color: var(--danger);
+  }
+  .log-entry.success {
+    border-left-color: var(--success);
+  }
+  .mic-icon {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+  }
+  .play-icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-left: 12px solid currentColor;
+    margin-left: 2px;
+  }
+  .stop-icon {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    background: currentColor;
+    border-radius: 2px;
+  }
+  .eye-icon, .eye-off-icon {
+    width: 18px;
+    height: 18px;
+  }
+  @media (max-width: 768px) {
+    .main-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div style="background:radial-gradient(900px 500px at 20% -10%, rgba(196,112,70,0.12), transparent 60%), radial-gradient(900px 500px at 80% -10%, rgba(123,168,184,0.10), transparent 60%), var(--bg); min-height:100vh; padding:24px;">
+  <div style="max-width:1200px; margin:0 auto;">
+    
+    <!-- Header -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+      <div>
+        <div class="header-title">RTranslator Web <span style="color:var(--accent);">Mini</span></div>
+        <div class="header-sub">Real-time English ↔ Vietnamese Voice Translation</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:16px; font-size:13px; color:var(--muted);">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span class="status-dot" id="apiStatus"></span>
+          <span id="apiStatusText">Checking browser...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main split panels -->
+    <div class="main-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:20px;">
+      
+      <!-- Left Panel: English → Vietnamese -->
+      <div class="panel" id="panelEn" style="padding:20px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="lang-badge lang-en">EN</span>
+            <span class="source-label">English Source</span>
+          </div>
+          <span class="status-dot" id="enStatus"></span>
+        </div>
+        <div contenteditable="true" class="text-box" id="enSource" placeholder="Speak or type English here..."></div>
+        <div class="translate-arrow">↓</div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; margin-top:8px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="lang-badge lang-vi">VI</span>
+            <span class="source-label">Vietnamese Translation</span>
+          </div>
+          <button class="btn btn-toggle" style="padding:6px 12px; font-size:12px;" onclick="speakText('vi', document.getElementById('viTarget').innerText)" title="Speak aloud">
+            <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            Speak
+          </button>
+        </div>
+        <div class="text-box" id="viTarget" style="color:var(--accent2);"></div>
+      </div>
+
+      <!-- Right Panel: Vietnamese → English -->
+      <div class="panel" id="panelVi" style="padding:20px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="lang-badge lang-vi">VI</span>
+            <span class="source-label">Vietnamese Source</span>
+          </div>
+          <span class="status-dot" id="viStatus"></span>
+        </div>
+        <div contenteditable="true" class="text-box" id="viSource" placeholder="Nói hoặc gõ tiếng Việt vào đây..."></div>
+        <div class="translate-arrow">↓</div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; margin-top:8px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="lang-badge lang-en">EN</span>
+            <span class="source-label">English Translation</span>
+          </div>
+          <button class="btn btn-toggle" style="padding:6px 12px; font-size:12px;" onclick="speakText('en', document.getElementById('enTarget').innerText)" title="Speak aloud">
+            <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            Speak
+          </button>
+        </div>
+        <div class="text-box" id="enTarget" style="color:var(--accent);"></div>
+      </div>
+    </div>
+
+    <!-- Control buttons -->
+    <div style="display:flex; align-items:center; justify-content:center; gap:16px; margin-bottom:20px; flex-wrap:wrap;">
+      <button class="btn btn-toggle active" id="toggleEn" onclick="togglePanel('en')">
+        <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        English Panel
+      </button>
+      
+      <button class="btn btn-primary" id="playBtn" onclick="toggleRecording()">
+        <span class="play-icon" id="playIcon"></span>
+        <span id="playLabel">Start</span>
+      </button>
+      
+      <button class="btn btn-toggle active" id="toggleVi" onclick="togglePanel('vi')">
+        <svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Vietnamese Panel
+      </button>
+    </div>
+
+    <!-- Activity log -->
+    <div class="panel" style="padding:16px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+        <span class="source-label">Activity Log</span>
+        <button class="btn btn-toggle" style="padding:4px 10px; font-size:11px;" onclick="document.getElementById('log').innerHTML=''">Clear</button>
+      </div>
+      <div id="log" style="max-height:120px; overflow-y:auto;"></div>
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align:center; margin-top:20px; font-size:12px; color:var(--muted);">
+      Inspired by <a href="https://github.com/niedev/RTranslator" target="_blank" style="color:var(--accent); text-decoration:none;">RTranslator</a> · Web version using Web Speech API + MyMemory Translation
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  // State
+  var state = {
+    isRecording: false,
+    enEnabled: true,
+    viEnabled: true,
+    recognitionEn: null,
+    recognitionVi: null,
+    lastTranslatedEn: '',
+    lastTranslatedVi: ''
+  };
+
+  // DOM elements
+  var el = {
+    apiStatus: document.getElementById('apiStatus'),
+    apiStatusText: document.getElementById('apiStatusText'),
+    enStatus: document.getElementById('enStatus'),
+    viStatus: document.getElementById('viStatus'),
+    enSource: document.getElementById('enSource'),
+    viSource: document.getElementById('viSource'),
+    enTarget: document.getElementById('enTarget'),
+    viTarget: document.getElementById('viTarget'),
+    panelEn: document.getElementById('panelEn'),
+    panelVi: document.getElementById('panelVi'),
+    toggleEn: document.getElementById('toggleEn'),
+    toggleVi: document.getElementById('toggleVi'),
+    playBtn: document.getElementById('playBtn'),
+    playIcon: document.getElementById('playIcon'),
+    playLabel: document.getElementById('playLabel'),
+    log: document.getElementById('log')
+  };
+
+  // Log function
+  function log(msg, type) {
+    var entry = document.createElement('div');
+    entry.className = 'log-entry' + (type ? ' ' + type : '');
+    var time = new Date().toLocaleTimeString();
+    entry.innerHTML = '<span style="color:var(--muted); font-size:11px;">[' + time + ']</span> ' + msg;
+    el.log.insertBefore(entry, el.log.firstChild);
+    if (el.log.children.length > 30) el.log.removeChild(el.log.lastChild);
+  }
+
+  // Check browser support
+  function checkSupport() {
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    var synthSupported = 'speechSynthesis' in window;
+    
+    if (!SpeechRecognition) {
+      el.apiStatusText.textContent = 'Speech recognition not supported (use Chrome/Edge)';
+      el.apiStatus.style.background = 'var(--danger)';
+      el.playBtn.disabled = true;
+      log('Browser does not support Web Speech API. Please use Chrome or Edge browser.', 'error');
+      return null;
+    }
+    
+    if (!synthSupported) {
+      log('Speech synthesis not supported in this browser. Text-to-speech disabled.', 'error');
+    }
+    
+    el.apiStatusText.textContent = 'Ready';
+    el.apiStatus.className = 'status-dot on';
+    log('System ready. Click Start to begin voice translation.');
+    return SpeechRecognition;
+  }
+
+  // Initialize speech recognition
+  function initRecognition(SpeechRecognition, lang, sourceEl, targetLang, targetEl, statusEl, panelEl, sourceLangCode) {
+    var recognition = new SpeechRecognition();
+    recognition.lang = lang;
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    
+    var interimText = '';
+    var finalText = '';
+    
+    recognition.onstart = function() {
+      statusEl.className = 'status-dot recording';
+      panelEl.classList.add('active-listening');
+    };
+    
+    recognition.onresult = function(event) {
+      interimText = '';
+      for (var i = event.resultIndex; i < event.results.length; i++) {
+        var transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalText += transcript + ' ';
+          var trimmed = transcript.trim();
+          if (trimmed) {
+            translateAndUpdate(trimmed, sourceLangCode, targetLang, targetEl);
+          }
+        } else {
+          interimText += transcript;
+        }
+      }
+      sourceEl.innerText = finalText + interimText;
+    };
+    
+    recognition.onerror = function(event) {
+      if (event.error !== 'no-speech' && event.error !== 'aborted') {
+        log('Recognition error (' + lang + '): ' + event.error, 'error');
+      }
+    };
+    
+    recognition.onend = function() {
+      statusEl.className = 'status-dot on';
+      panelEl.classList.remove('active-listening');
+      // Auto-restart if still recording
+      if (state.isRecording) {
+        try {
+          recognition.start();
+        } catch(e) {}
+      }
+    };
+    
+    return recognition;
+  }
+
+  // Translate text using MyMemory API
+  function translateAndUpdate(text, sourceLang, targetLang, targetEl) {
+    if (!text || text.length < 1) return;
+    
+    var url = 'https://api.mymemory.translated.net/get?q=' + encodeURIComponent(text) + '&langpair=' + sourceLang + '|' + targetLang;
+    
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data && data.responseData && data.responseData.translatedText) {
+          var translated = data.responseData.translatedText;
+          var current = targetEl.innerText;
+          targetEl.innerText = current ? current + ' ' + translated : translated;
+          // Auto-scroll to bottom
+          targetEl.scrollTop = targetEl.scrollHeight;
+          log('Translated ' + sourceLang.toUpperCase() + ' → ' + targetLang.toUpperCase() + ': "' + text.substring(0,40) + (text.length>40?'...':'') + '"', 'success');
+          // Auto-speak the translation
+          speakText(targetLang, translated);
+        } else {
+          log('Translation returned empty result', 'error');
+        }
+      })
+      .catch(function(err) {
+        log('Translation API error: ' + err.message, 'error');
+      });
+  }
+
+  // Speak text
+  window.speakText = function(lang, text) {
+    if (!text || !('speechSynthesis' in window)) return;
+    try {
+      window.speechSynthesis.cancel();
+      var utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = lang === 'en' ? 'en-US' : 'vi-VN';
+      utterance.rate = 0.95;
+      window.speechSynthesis.speak(utterance);
+    } catch(e) {
+      log('Speech synthesis error: ' + e.message, 'error');
+    }
+  };
+
+  // SVG icons for eye toggle
+  var eyeOnSVG = '<svg class="eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+  var eyeOffSVG = '<svg class="eye-off-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+  // Toggle panel visibility
+  window.togglePanel = function(side) {
+    if (side === 'en') {
+      state.enEnabled = !state.enEnabled;
+      el.panelEn.classList.toggle('disabled', !state.enEnabled);
+      el.toggleEn.classList.toggle('active', state.enEnabled);
+      el.toggleEn.classList.toggle('off', !state.enEnabled);
+      el.toggleEn.innerHTML = (state.enEnabled ? eyeOnSVG : eyeOffSVG) + ' English Panel';
+      log('English panel ' + (state.enEnabled ? 'enabled' : 'disabled'));
+    } else {
+      state.viEnabled = !state.viEnabled;
+      el.panelVi.classList.toggle('disabled', !state.viEnabled);
+      el.toggleVi.classList.toggle('active', state.viEnabled);
+      el.toggleVi.classList.toggle('off', !state.viEnabled);
+      el.toggleVi.innerHTML = (state.viEnabled ? eyeOnSVG : eyeOffSVG) + ' Vietnamese Panel';
+      log('Vietnamese panel ' + (state.viEnabled ? 'enabled' : 'disabled'));
+    }
+  };
+
+  // Toggle recording
+  window.toggleRecording = function() {
+    if (state.isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
+  function startRecording() {
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      log('Speech recognition not supported', 'error');
+      return;
+    }
+    
+    state.isRecording = true;
+    el.playBtn.classList.add('recording');
+    el.playIcon.className = 'stop-icon';
+    el.playLabel.textContent = 'Stop';
+    
+    // Clear previous text
+    el.enSource.innerText = '';
+    el.viSource.innerText = '';
+    el.enTarget.innerText = '';
+    el.viTarget.innerText = '';
+    
+    if (state.enEnabled) {
+      try {
+        state.recognitionEn = initRecognition(SpeechRecognition, 'en-US', el.enSource, 'vi', el.viTarget, el.enStatus, el.panelEn, 'en');
+        state.recognitionEn.start();
+        log('English recognition started');
+      } catch(e) {
+        log('Failed to start English recognition: ' + e.message, 'error');
+      }
+    }
+    
+    if (state.viEnabled) {
+      try {
+        state.recognitionVi = initRecognition(SpeechRecognition, 'vi-VN', el.viSource, 'en', el.enTarget, el.viStatus, el.panelVi, 'vi');
+        state.recognitionVi.start();
+        log('Vietnamese recognition started');
+      } catch(e) {
+        log('Failed to start Vietnamese recognition: ' + e.message, 'error');
+      }
+    }
+    
+    log('Recording started. Speak now...');
+  }
+
+  function stopRecording() {
+    state.isRecording = false;
+    el.playBtn.classList.remove('recording');
+    el.playIcon.className = 'play-icon';
+    el.playLabel.textContent = 'Start';
+    
+    if (state.recognitionEn) {
+      try { state.recognitionEn.stop(); } catch(e) {}
+      state.recognitionEn = null;
+    }
+    if (state.recognitionVi) {
+      try { state.recognitionVi.stop(); } catch(e) {}
+      state.recognitionVi = null;
+    }
+    
+    el.enStatus.className = 'status-dot';
+    el.viStatus.className = 'status-dot';
+    el.panelEn.classList.remove('active-listening');
+    el.panelVi.classList.remove('active-listening');
+    
+    log('Recording stopped.');
+  }
+
+  // Also allow typing in source boxes and translating on Enter
+  el.enSource.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      var text = this.innerText.trim();
+      if (text) translateAndUpdate(text, 'en', 'vi', el.viTarget);
+    }
+  });
+  
+  el.viSource.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      var text = this.innerText.trim();
+      if (text) translateAndUpdate(text, 'vi', 'en', el.enTarget);
+    }
+  });
+
+  // Init
+  checkSupport();
+  
+  // Preload voices
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = function() {
+      window.speechSynthesis.getVoices();
+    };
+  }
+})();
+</script>
+</body>
+</html>
