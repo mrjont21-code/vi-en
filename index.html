@@ -15,23 +15,19 @@
     overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
   }
 
-  /* Full screen app container - fills entire viewport */
   .app {
     width: 100vw;
     height: 100vh;
-    height: 100dvh; /* dynamic viewport height for mobile */
+    height: 100dvh;
     display: flex;
     flex-direction: column;
     background: #111111;
   }
 
-  /* Top area: 14/16 of height, split vertically (left-right) */
+  /* ===== TOP AREA: 14/16 ===== */
   .top-area {
     flex: 14;
     display: flex;
@@ -50,36 +46,27 @@
     min-width: 0;
   }
 
-  .panel-left {
-    border-right: 1px solid rgba(255,255,255,0.06);
-  }
-
-  .panel.disabled {
-    opacity: 0.15;
-    filter: grayscale(1);
-  }
-
-  .panel.active {
-    background: radial-gradient(ellipse at center, rgba(74,222,128,0.05), transparent 70%);
-  }
+  .panel-left { border-right: 1px solid rgba(255,255,255,0.06); }
+  .panel.disabled { opacity: 0.15; filter: grayscale(1); }
+  .panel.active { background: radial-gradient(ellipse at center, rgba(74,222,128,0.05), transparent 70%); }
 
   .lang-tag {
     font-size: clamp(12px, 3.5vw, 18px);
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    margin-bottom: 5%;
-    opacity: 0.5;
+    margin-bottom: 4%;
+    opacity: 0.4;
     flex-shrink: 0;
   }
-
   .panel-left .lang-tag { color: #60a5fa; }
   .panel-right .lang-tag { color: #f97316; }
 
+  /* SOURCE text = GRAY (ngôn ngữ gốc, màu xám) */
   .source-text {
     font-size: clamp(14px, 4.2vw, 22px);
     line-height: 1.35;
-    color: #ffffff;
+    color: rgba(255, 255, 255, 0.45);  /* MÀU XÁM */
     overflow-y: auto;
     flex: 1;
     word-break: break-word;
@@ -87,25 +74,22 @@
     margin-bottom: 4%;
   }
 
+  /* TRANSLATED text = WHITE (bản dịch, màu trắng nổi bật) */
   .translated-text {
-    font-size: clamp(12px, 3.6vw, 18px);
+    font-size: clamp(14px, 4.2vw, 22px);
     line-height: 1.35;
+    color: #ffffff;  /* MÀU TRẮNG */
     overflow-y: auto;
     flex: 1;
     word-break: break-word;
-    opacity: 0.65;
     min-height: 0;
-    border-top: 1px solid rgba(255,255,255,0.05);
+    border-top: 1px solid rgba(255,255,255,0.08);
     padding-top: 4%;
   }
 
-  .panel-left .translated-text { color: #f97316; }
-  .panel-right .translated-text { color: #60a5fa; }
-
   .source-text::-webkit-scrollbar, .translated-text::-webkit-scrollbar { width: 2px; }
   .source-text::-webkit-scrollbar-thumb, .translated-text::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.1);
-    border-radius: 1px;
+    background: rgba(255,255,255,0.1); border-radius: 1px;
   }
 
   .text-chunk {
@@ -113,13 +97,12 @@
     margin-bottom: 0.35em;
     animation: fadeIn 0.3s ease;
   }
-
   @keyframes fadeIn {
     from { opacity: 0; transform: translateY(3px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
-  /* Bottom area: 2/16 of height, controls */
+  /* ===== BOTTOM AREA: 2/16 ===== */
   .bottom-area {
     flex: 2;
     display: flex;
@@ -132,7 +115,7 @@
     flex-shrink: 0;
   }
 
-  /* Toggle switches I/O style */
+  /* TOGGLE I/O */
   .toggle {
     width: clamp(56px, 16vw, 90px);
     height: clamp(30px, 8.5vw, 48px);
@@ -150,19 +133,16 @@
     padding: 0 8%;
     flex-shrink: 0;
   }
-
   .toggle.on {
     background: #22c55e;
     box-shadow: 0 0 18px rgba(34,197,94,0.4);
     color: #ffffff;
   }
-
   .toggle.off {
     background: #dc2626;
     box-shadow: 0 0 14px rgba(220,38,38,0.2);
     color: rgba(255,255,255,0.5);
   }
-
   .toggle .knob {
     position: absolute;
     top: 12%;
@@ -173,19 +153,13 @@
     transition: left 0.25s cubic-bezier(0.4,0,0.2,1);
     box-shadow: 0 1px 4px rgba(0,0,0,0.3);
   }
-
   .toggle.on .knob { left: 58%; }
   .toggle.off .knob { left: 6%; }
-
-  .toggle .lbl-on, .toggle .lbl-off {
-    position: relative;
-    z-index: 1;
-  }
-
+  .toggle .lbl-on, .toggle .lbl-off { position: relative; z-index: 1; }
   .toggle.on .lbl-off { opacity: 0; }
   .toggle.off .lbl-on { opacity: 0; }
 
-  /* Center play/stop circle button */
+  /* CENTER PLAY/STOP BUTTON */
   .center-btn {
     width: clamp(54px, 15vw, 84px);
     height: clamp(54px, 15vw, 84px);
@@ -200,60 +174,41 @@
     position: relative;
     flex-shrink: 0;
   }
-
-  .center-btn:active:not(:disabled) {
-    transform: scale(0.95);
-  }
-
+  .center-btn:active:not(:disabled) { transform: scale(0.95); }
   .center-btn.playing {
     background: #dc2626;
     box-shadow: 0 0 0 0 rgba(220,38,38,0.5);
     animation: pulse 1.6s ease-out infinite;
   }
-
   @keyframes pulse {
     0% { box-shadow: 0 0 0 0 rgba(220,38,38,0.5); }
     70% { box-shadow: 0 0 0 16px rgba(220,38,38,0); }
     100% { box-shadow: 0 0 0 0 rgba(220,38,38,0); }
   }
-
   .center-btn .icon-play {
-    width: 0;
-    height: 0;
+    width: 0; height: 0;
     border-top: clamp(8px, 2.2vw, 14px) solid transparent;
     border-bottom: clamp(8px, 2.2vw, 14px) solid transparent;
     border-left: clamp(12px, 3.2vw, 20px) solid #ffffff;
     margin-left: 8%;
   }
-
   .center-btn .icon-stop {
     width: clamp(10px, 2.8vw, 18px);
     height: clamp(10px, 2.8vw, 18px);
     background: #ffffff;
     border-radius: 2px;
   }
+  .center-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-  .center-btn:disabled {
-    opacity: 0.3;
-    cursor: not-allowed;
-  }
-
-  /* Status indicator bar */
+  /* STATUS BAR */
   .status-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: transparent;
+    position: absolute; top: 0; left: 0; right: 0; height: 2px; background: transparent;
   }
-
   .status-bar.active {
     background: linear-gradient(90deg, transparent, #22c55e, transparent);
     animation: slide 1s linear infinite;
     background-size: 200% 100%;
   }
-
   @keyframes slide {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
@@ -263,10 +218,10 @@
 <body>
 <div class="app">
   
-  <!-- Top 14/16 area: split vertically (left-right) -->
+  <!-- TOP 14/16: 2 panels side by side -->
   <div class="top-area">
     
-    <!-- Left panel: English source → Vietnamese translation -->
+    <!-- LEFT: English source (gray) → Vietnamese translation (white) -->
     <div class="panel panel-left" id="panelEn">
       <div class="status-bar" id="statusBarEn"></div>
       <div class="lang-tag">EN</div>
@@ -274,7 +229,7 @@
       <div class="translated-text" id="viTarget"></div>
     </div>
     
-    <!-- Right panel: Vietnamese source → English translation -->
+    <!-- RIGHT: Vietnamese source (gray) → English translation (white) -->
     <div class="panel panel-right" id="panelVi">
       <div class="status-bar" id="statusBarVi"></div>
       <div class="lang-tag">VI</div>
@@ -284,9 +239,8 @@
     
   </div>
   
-  <!-- Bottom 2/16 area: controls -->
+  <!-- BOTTOM 2/16: Controls -->
   <div class="bottom-area">
-    
     <button class="toggle on" id="toggleEn" onclick="togglePanel('en')">
       <span class="knob"></span>
       <span class="lbl-on">I</span>
@@ -302,7 +256,6 @@
       <span class="lbl-on">I</span>
       <span class="lbl-off">O</span>
     </button>
-    
   </div>
   
 </div>
@@ -311,13 +264,13 @@
 (function() {
   'use strict';
 
-  // ============ CONFIGURATION ============
+  // ===== CONFIG =====
   var MIN_DETECT_SECONDS = 2.0;
   var OVERLAP_SECONDS = 0.2;
   var CHUNK_SECONDS = MIN_DETECT_SECONDS + OVERLAP_SECONDS;
   var CHUNK_INTERVAL = MIN_DETECT_SECONDS;
 
-  // ============ STATE ============
+  // ===== STATE =====
   var state = {
     isPlaying: false,
     enEnabled: true,
@@ -332,8 +285,7 @@
     lastFinalEn: '',
     lastFinalVi: '',
     recognitionEn: null,
-    recognitionVi: null,
-    audioContext: null
+    recognitionVi: null
   };
 
   // DOM
@@ -352,34 +304,26 @@
     statusBarVi: document.getElementById('statusBarVi')
   };
 
-  // ============ TEXT SIMILARITY / DEDUP ============
+  // ===== DEDUP =====
   function fingerprint(t) {
     return t.toLowerCase().replace(/[\s.,!?;:'"-]/g, '').substring(0, 40);
   }
-
   function isDuplicate(lang, text) {
     var fp = fingerprint(text);
     if (fp.length < 4) return false;
     var set = state.processedTexts.get(lang);
     if (!set) return false;
-    for (var e of set) {
-      if (e.includes(fp) || fp.includes(e)) return true;
-    }
+    for (var e of set) { if (e.includes(fp) || fp.includes(e)) return true; }
     return false;
   }
-
   function markProcessed(lang, text) {
     var fp = fingerprint(text);
     if (fp.length < 4) return;
     if (!state.processedTexts.has(lang)) state.processedTexts.set(lang, new Set());
     state.processedTexts.get(lang).add(fp);
     var set = state.processedTexts.get(lang);
-    if (set.size > 50) {
-      var first = set.values().next().value;
-      set.delete(first);
-    }
+    if (set.size > 50) set.delete(set.values().next().value);
   }
-
   function appendText(c, t) {
     var s = document.createElement('span');
     s.className = 'text-chunk';
@@ -388,11 +332,11 @@
     c.scrollTop = c.scrollHeight;
   }
 
-  // ============ TRANSLATION ============
+  // ===== TRANSLATION =====
   function translateText(text, sl, tl, cb) {
     if (!text || text.trim().length < 1) return;
     fetch('https://api.mymemory.translated.net/get?q=' + 
-          encodeURIComponent(text.trim()) + '&langpair=' + sl + '|' + tl, 
+          encodeURIComponent(text.trim()) + '&langpair=' + sl + '|' + tl,
           { cache: 'force-cache' })
       .then(function(r) { return r.json(); })
       .then(function(d) {
@@ -403,13 +347,12 @@
       .catch(function() {});
   }
 
-  // ============ TTS QUEUE ============
+  // ===== TTS QUEUE (theo thứ tự thời gian) =====
   function speakText(lang, text) {
     if (!text || !('speechSynthesis' in window)) return;
     state.ttsQueue.push({ lang: lang, text: text });
     processTtsQueue();
   }
-
   function processTtsQueue() {
     if (state.isSpeaking || state.ttsQueue.length === 0) return;
     var item = state.ttsQueue.shift();
@@ -428,7 +371,8 @@
     }
   }
 
-  // ============ PROCESS CHUNK ============
+  // ===== PROCESS VOICE CHUNK =====
+  // voice chunk → text ngôn ngữ chuẩn (xám) → dịch → text dịch (trắng) → TTS
   function processChunk(lang, text) {
     if (!text || text.trim().length < 2) return;
     if (isDuplicate(lang, text)) return;
@@ -436,18 +380,22 @@
 
     if (lang === 'en') {
       if (!state.enEnabled) return;
+      // Bước 1: Hiển thị text gốc tiếng Anh (màu xám) ở khung trái
       appendText(el.enSource, text);
       el.panelEn.classList.add('active');
       setTimeout(function() { el.panelEn.classList.remove('active'); }, 800);
+      // Bước 2: Dịch sang tiếng Việt → hiển thị (màu trắng) bên dưới → TTS
       translateText(text, 'en', 'vi', function(tr) {
         appendText(el.viTarget, tr);
         speakText('vi', tr);
       });
     } else {
       if (!state.viEnabled) return;
+      // Bước 1: Hiển thị text gốc tiếng Việt (màu xám) ở khung phải
       appendText(el.viSource, text);
       el.panelVi.classList.add('active');
       setTimeout(function() { el.panelVi.classList.remove('active'); }, 800);
+      // Bước 2: Dịch sang tiếng Anh → hiển thị (màu trắng) bên dưới → TTS
       translateText(text, 'vi', 'en', function(tr) {
         appendText(el.enTarget, tr);
         speakText('en', tr);
@@ -455,7 +403,7 @@
     }
   }
 
-  // ============ SPEECH RECOGNITION ============
+  // ===== SPEECH RECOGNITION =====
   function createRecognition(lang, onResult) {
     var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) return null;
@@ -474,12 +422,10 @@
       }
       onResult(finalText.trim(), interim, lang);
     };
-
     rec.onerror = function(e) {};
     rec.onend = function() {
       if (state.isPlaying) { try { rec.start(); } catch(e) {} }
     };
-
     return rec;
   }
 
@@ -493,7 +439,8 @@
     }
   }
 
-  // ============ CHUNK-BASED PROCESSING ============
+  // ===== CHUNK-BASED PROCESSING =====
+  // Cắt ghi âm: voice1 = 0-2.2s, voice2 = 2.0-4.2s, voice3 = 4.0-6.2s ...
   function processTimeChunk() {
     var enText = state.lastFinalEn || state.currentChunkEn;
     var viText = state.lastFinalVi || state.currentChunkVi;
@@ -501,34 +448,25 @@
     var viLen = viText ? viText.trim().length : 0;
     var threshold = 3;
 
+    // Xác định ngôn ngữ nào chiếm ưu thế trong chunk này
     if (enLen >= threshold && enLen >= viLen * 1.5) {
       processChunk('en', enText.trim());
     } else if (viLen >= threshold && viLen >= enLen * 1.5) {
       processChunk('vi', viText.trim());
     } else if (enLen >= threshold && viLen >= threshold) {
-      var enDup = isDuplicate('en', enText);
-      var viDup = isDuplicate('vi', viText);
-      if (!enDup) processChunk('en', enText.trim());
-      if (!viDup) processChunk('vi', viText.trim());
+      // Cả 2 đều có nội dung → xử lý cả hai (trường hợp 2 người nói)
+      if (!isDuplicate('en', enText)) processChunk('en', enText.trim());
+      if (!isDuplicate('vi', viText)) processChunk('vi', viText.trim());
     }
 
+    // Reset cho chunk tiếp theo
     state.lastFinalEn = '';
     state.lastFinalVi = '';
     state.currentChunkEn = '';
     state.currentChunkVi = '';
   }
 
-  function setupAudioVisualizer(stream) {
-    try {
-      state.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      var src = state.audioContext.createMediaStreamSource(stream);
-      var an = state.audioContext.createAnalyser();
-      an.fftSize = 256;
-      src.connect(an);
-    } catch(e) {}
-  }
-
-  // ============ TOGGLE PANELS ============
+  // ===== TOGGLE PANELS =====
   window.togglePanel = function(side) {
     if (side === 'en') {
       state.enEnabled = !state.enEnabled;
@@ -543,7 +481,7 @@
     }
   };
 
-  // ============ MAIN PLAY/STOP ============
+  // ===== MAIN PLAY/STOP =====
   window.togglePlay = function() {
     if (state.isPlaying) stopPlayback();
     else startPlayback();
@@ -552,10 +490,11 @@
   function startPlayback() {
     var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
-      alert('Please use Chrome or Edge browser.');
+      alert('Vui lòng sử dụng trình duyệt Chrome hoặc Edge.');
       return;
     }
 
+    // Xóa nội dung cũ
     el.enSource.innerHTML = '';
     el.viSource.innerHTML = '';
     el.enTarget.innerHTML = '';
@@ -572,13 +511,13 @@
         state.stream = stream;
         state.isPlaying = true;
 
+        // Cập nhật UI
         el.centerBtn.classList.add('playing');
         el.centerIcon.className = 'icon-stop';
         el.statusBarEn.classList.add('active');
         el.statusBarVi.classList.add('active');
 
-        setupAudioVisualizer(stream);
-
+        // Khởi động nhận dạng cho 2 ngôn ngữ
         if (state.enEnabled) {
           state.recognitionEn = createRecognition('en-US', handleRecognitionResult);
           try { state.recognitionEn.start(); } catch(e) {}
@@ -588,13 +527,15 @@
           try { state.recognitionVi.start(); } catch(e) {}
         }
 
+        // Timer cắt chunk: chunk đầu sau 2.2s, sau đó mỗi 2.0s
+        // voice1 = 0-2.2s, voice2 = 2.0-4.2s, voice3 = 4.0-6.2s ...
         state.chunkTimer = setTimeout(function firstChunk() {
           processTimeChunk();
           state.chunkTimer = setInterval(processTimeChunk, CHUNK_INTERVAL * 1000);
         }, CHUNK_SECONDS * 1000);
       })
       .catch(function(err) {
-        alert('Microphone access denied: ' + err.message);
+        alert('Không thể truy cập microphone: ' + err.message);
       });
   }
 
@@ -625,10 +566,6 @@
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     state.ttsQueue = [];
     state.isSpeaking = false;
-    if (state.audioContext) {
-      try { state.audioContext.close(); } catch(e) {}
-      state.audioContext = null;
-    }
   }
 
   // Preload voices
@@ -639,7 +576,7 @@
     };
   }
 
-  // Prevent iOS zoom on double-tap
+  // Prevent iOS zoom
   var lastTouchEnd = 0;
   document.addEventListener('touchend', function(e) {
     var now = Date.now();
